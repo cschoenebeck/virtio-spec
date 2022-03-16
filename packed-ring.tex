@@ -195,7 +195,7 @@ single used descriptor corresponds to the whole list.
 The device limits the number of descriptors in a list through a
 transport-specific and/or device-specific value. If not limited,
 the maximum number of descriptors in a list is the virt queue
-size.
+size unless the VIRTIO_RING_F_INDIRECT_SIZE feature has been negotiated.
 
 \subsection{Next Flag: Descriptor Chaining}
 \label{sec:Packed Virtqueues / Next Flag: Descriptor Chaining}

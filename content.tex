@@ -99,10 +99,10 @@ Feature bits are allocated as follows:
 \begin{description}
 \item[0 to 23, and 50 to 127] Feature bits for the specific device type
 
-\item[24 to 40] Feature bits reserved for extensions to the queue and
+\item[24 to 41] Feature bits reserved for extensions to the queue and
   feature negotiation mechanisms
 
-\item[41 to 49, and 128 and above] Feature bits reserved for future extensions.
+\item[42 to 49, and 128 and above] Feature bits reserved for future extensions.
 \end{description}
 
 \begin{note}
@@ -1050,6 +1050,10 @@ corresponding to the current \field{queue_select} is unavailable.
 If VIRTIO_F_RING_PACKED has not been negotiated, the device MUST
 present either a value of 0 or a power of 2 in
 \field{queue_size}.
+
+If VIRTIO_RING_F_INDIRECT_SIZE has been negotiated, the device MUST provide the
+Queue Indirect Size supported by device, which is a transport specific
+configuration. It MUST allow the driver to set a lower value.
 
 \drivernormative{\paragraph}{Common configuration structure layout}{Virtio Transport Options / Virtio Over PCI Bus / PCI Device Layout / Common configuration structure layout}
 
@@ -6846,6 +6850,30 @@ Descriptors} and \ref{sec:Packed Virtqueues / Indirect Flag: Scatter-Gather Supp
   \item[VIRTIO_F_RING_RESET(40)] This feature indicates
   that the driver can reset a queue individually.
   See \ref{sec:Basic Facilities of a Virtio Device / Virtqueues / Virtqueue Reset}.
+
+  \item[VIRTIO_RING_F_INDIRECT_SIZE(41)] This feature indicates that the
+  Queue Indirect Size, i.e. the maximum amount of descriptors in indirect
+  descriptor tables, is independent from the Queue Size.
+
+  Without this feature, the Queue Size limits the length of the descriptor
+  chain, including indirect descriptor tables as in \ref{sec:Basic Facilities of
+  a Virtio Device / Virtqueues / The Virtqueue Descriptor Table / Indirect
+  Descriptors}, i.e. both the maximum amount of slots in the vring and the
+  actual bulk data size transmitted per vring slot.
+
+  With this feature enabled, the Queue Size only limits the maximum amount
+  of slots in the vring, but does not limit the actual bulk data size
+  being transmitted when indirect descriptors are used. Decoupling these
+  two configuration parameters this way not only allows much larger bulk data
+  being transferred per vring slot, but also avoids complicated synchronization
+  mechanisms if the device only supports a very small amount of vring slots. Due
+  to the 16-bit size of a descriptor's "next" field there is still an absolute
+  limit of $2^{16}$ descriptors per indirect descriptor table. However the
+  actual maximum amount supported by either device or driver might be less,
+  and therefore the bus specific Queue Indirect Size value MUST additionally
+  be negotiated if VIRTIO_RING_F_INDIRECT_SIZE was negotiated to subsequently
+  negotiate the actual amount of maximum indirect descriptors supported
+  by both sides.
 
 \end{description}
 

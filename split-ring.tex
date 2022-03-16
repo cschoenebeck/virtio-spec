@@ -268,8 +268,12 @@ VIRTIO_F_INDIRECT_DESC feature was negotiated.   The driver MUST NOT
 set the VIRTQ_DESC_F_INDIRECT flag within an indirect descriptor (ie. only
 one table per descriptor).
 
-A driver MUST NOT create a descriptor chain longer than the Queue Size of
-the device.
+If VIRTIO_RING_F_INDIRECT_SIZE has not been negotiated, the driver MUST
+NOT create a descriptor chain longer than the Queue Size of the device.
+
+If VIRTIO_RING_F_INDIRECT_SIZE has been negotiated, the number of
+descriptors per indirect descriptor table MUST NOT exceed the negotiated
+Queue Indirect Size.
 
 A driver MUST NOT set both VIRTQ_DESC_F_INDIRECT and VIRTQ_DESC_F_NEXT
 in \field{flags}.
