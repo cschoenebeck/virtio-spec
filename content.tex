@@ -2520,7 +2520,9 @@ The following values are supported:
 \hline
 2        & 0      & <empty>   & CCW_CMD_READ_STATUS support \\
 \hline
-3-n      &        &           & reserved for later revisions \\
+3        & 0      & <empty>   & Queue Indirect Size (indirect_num) support \\
+\hline
+4-n      &        &           & reserved for later revisions \\
 \hline
 \end{tabular}
 
@@ -2581,11 +2583,16 @@ about a queue. It uses the following structure for communicating:
 struct vq_config_block {
         be16 index;
         be16 max_num;
+        be32 indirect_num; /* since virtio-ccw rev. 3 */
 };
 \end{lstlisting}
 
 The requested number of buffers for queue \field{index} is returned in
 \field{max_num}.
+
+Since revision 3, \field{indirect_num} exists, which is supposed to reflect the
+Queue Indirect Size (i.e. the maximum length of indirect descriptor tables)
+supported by device for this queue.
 
 Afterwards, CCW_CMD_SET_VQ is issued by the driver to inform the
 device about the location used for its queue. The transmitted
@@ -2599,6 +2606,7 @@ struct vq_info_block {
         be16 num;
         be64 driver;
         be64 device;
+        be32 indirect_num; /* since virtio-ccw rev. 3 */
 };
 \end{lstlisting}
 
@@ -2606,6 +2614,10 @@ struct vq_info_block {
 addresses for the descriptor area,
 available area and used area for queue \field{index}, respectively. The actual
 virtqueue size (number of allocated buffers) is transmitted in \field{num}.
+
+Since revision 3, \field{indirect_num} exists, which is supposed to reflect the
+Queue Indirect Size (i.e. the maximum length of indirect descriptor tables)
+supported by driver for this queue.
 
 \devicenormative{\paragraph}{Configuring a Virtqueue}{Virtio Transport Options / Virtio over channel I/O / Device Initialization / Configuring a Virtqueue}
 
