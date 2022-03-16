@@ -902,6 +902,7 @@ struct virtio_pci_common_cfg {
         le64 queue_device;              /* read-write */
         le16 queue_notify_data;         /* read-only for driver */
         le16 queue_reset;               /* read-write */
+        le32 queue_indirect_size;       /* read-write */
 };
 \end{lstlisting}
 
@@ -987,6 +988,17 @@ struct virtio_pci_common_cfg {
         This field exists only if VIRTIO_F_RING_RESET has been
         negotiated. (see \ref{sec:Basic Facilities of a Virtio Device / Virtqueues / Virtqueue Reset}).
 
+\item[\field{queue_indirect_size}]
+        This field is used to negotiate the maximum number of descriptors per
+        indirect descriptor table as in \ref{sec:Basic Facilities of a Virtio
+        Device / Virtqueues / The Virtqueue Descriptor Table / Indirect
+        Descriptors} if and only if the VIRTIO_RING_F_INDIRECT_SIZE feature has
+        been negotiated.
+
+        The device specifies its maximum number of descriptors per indirect
+        descriptor table. If the driver requires fewer descriptors, it writes
+        its lower value to inform the device of the reduced resource
+        requirements.
 \end{description}
 
 \devicenormative{\paragraph}{Common configuration structure layout}{Virtio Transport Options / Virtio Over PCI Bus / PCI Device Layout / Common configuration structure layout}
@@ -1080,6 +1092,12 @@ is 1. The driver MAY re-enable the queue by writing a 1 to
 been set up correctly. The driver MAY set driver-writeable queue configuration
 values to different values than those that were used before the queue reset.
 (see \ref{sec:Basic Facilities of a Virtio Device / Virtqueues / Virtqueue Reset}).
+
+The driver SHOULD write to \field{queue_indirect_size} if its maximum number of
+descriptors per vring slot is lower than that reported by the device.
+
+The driver MUST NOT write a higher value to \field{queue_indirect_size} than the
+one it reads from the device.
 
 \subsubsection{Notification structure layout}\label{sec:Virtio Transport Options / Virtio Over PCI Bus / PCI Device Layout / Notification capability}
 
@@ -6870,10 +6888,10 @@ Descriptors} and \ref{sec:Packed Virtqueues / Indirect Flag: Scatter-Gather Supp
   to the 16-bit size of a descriptor's "next" field there is still an absolute
   limit of $2^{16}$ descriptors per indirect descriptor table. However the
   actual maximum amount supported by either device or driver might be less,
-  and therefore the bus specific Queue Indirect Size value MUST additionally
-  be negotiated if VIRTIO_RING_F_INDIRECT_SIZE was negotiated to subsequently
-  negotiate the actual amount of maximum indirect descriptors supported
-  by both sides.
+  and therefore the transport specific Queue Indirect Size value MUST
+  additionally be negotiated if VIRTIO_RING_F_INDIRECT_SIZE was negotiated to
+  subsequently negotiate the actual amount of maximum indirect descriptors
+  supported by both sides.
 
 \end{description}
 
