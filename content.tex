@@ -2225,8 +2225,9 @@ nor behaviour:
   \hline
   \mmioreg{QueueSel}{Virtual queue index}{0x030}{W}{%
     Writing to this register selects the virtual queue that the
-    following operations on the \field{QueueNumMax}, \field{QueueNum}, \field{QueueAlign}
-    and \field{QueuePFN} registers apply to. The index
+    following operations on the \field{QueueNumMax}, \field{QueueNum},
+    \field{QueueAlign}, \field{QueuePFN} and \field{QueueIndirectNum} registers
+    apply to. The index
     number of the first queue is zero (0x0). 
 .
   }
@@ -2282,6 +2283,19 @@ nor behaviour:
     Also see \ref{sec:General Initialization And Device Operation / Device Initialization}~\nameref{sec:General Initialization And Device Operation / Device Initialization}.
   }
   \hline
+  \mmioreg{QueueIndirectNum}{Virtual queue indirect size}{0x074}{RW}{%
+    This register is used to negotiate the maximum number of descriptors per
+    indirect descriptor table as in \ref{sec:Basic Facilities of a Virtio
+    Device / Virtqueues / The Virtqueue Descriptor Table / Indirect Descriptors}
+    if and only if the VIRTIO_RING_F_INDIRECT_SIZE feature has been negotiated.
+
+    The device specifies its maximum number of descriptors per indirect
+    descriptor table. If the driver requires fewer descriptors, it writes
+    its lower value to inform the device of the reduced resource requirements.
+
+    This applies to the queue selected by writing to \field{QueueSel}.
+  }
+  \hline
   \mmioreg{Config}{Configuration space}{0x100+}{RW}{}
   \hline
 \end{longtable}
@@ -2313,6 +2327,10 @@ The virtual queue is configured as follows:
 
 \item Notify the device about the queue size by writing the size to
    \field{QueueNum}.
+
+\item If VIRTIO_RING_F_INDIRECT_SIZE has been negotiated, read the maximum
+   length of indirect descriptor tables by reading \field{QueueIndirectNum}.
+   Write to lower this value if necessary.
 
 \item Notify the device about the used alignment by writing its value
    in bytes to \field{QueueAlign}.
